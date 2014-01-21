@@ -3,160 +3,111 @@ package SmartRandom;
 import Taipan.Card;
 import Taipan.CardSet;
 import Taipan.IllegalMoveException;
+import Taipan.Player;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.TreeSet;
+import java.util.*;
 
 public class CardsRater {
-	private TreeSet<Card> cards;
+	static HashMap<TreeSet<Card>, Integer> save = new HashMap<TreeSet<Card>, Integer>();
 
-	public CardsRater(TreeSet<Card> cards) {
-		this.cards = cards;
+	private CardsRater() {
 	}
 
-	public int rateCards() {
+	public static int rateCards(TreeSet<Card> cards) {
 		if (cards.size() == 0) {
 			return 0;
 		} else if (cards.size() == 1) {
-			return cards.first().getValue();
+			return cards.first().getRatingValue();
 		}
 
-		/*
-		for (Card c1 : cardsAL) {
-			working.remove(c1);
-			for (Card c2 : cardsAL) {
-				if (c1.equals(c2)) {
-					continue;
-				}
-				working.remove(c2);
-				for (Card c3 : cardsAL) {
-					if (c3.equals(c2) || c3.equals(c1)) {
-						continue;
-					}
-					working.remove(c3);
-
-
-					System.out.println(c1 + " " + c2 + " " + c3);
-
-
-					working.add(c3);
-				}
-				working.add(c2);
-			}
-			working.add(c1);
-		}
-*/
-
-
-		int bestRating = 1, rating;
-		int[] numCards = new int[Card.DRAGON + 1];
-		Card last3Card = null, last2Card = null, lastCard = null;
-		ArrayList<Card> progress = new ArrayList<Card>(4);
-
-
-		boolean findBomb = false, findTriple = false, findPair = false;
-		int val;
-		for (Card c : cards) {
-			val = c.getValue();
-			numCards[val]++;
-			if (numCards[val] == 2) {
-				findPair = true;
-			} else if (numCards[val] == 3) {
-				findTriple = true;
-			} else if (numCards[val] == 4) {
-				findBomb = true;
-			}
+		if (save.containsKey(cards)) {
+			return save.get(cards);
 		}
 
+		int bestRating = 1;
 		try {
-			TreeSet<Card> cardsAL = (TreeSet<Card>) cards.clone();
-			TreeSet<Card> working = new TreeSet<Card>();
+			int rating;
+			TreeSet<Card> working = (TreeSet<Card>) cards.clone();
+
+			/* TODO: needs optimizing, a lot of double counting! */
+			int val;
+			ArrayList<Card>[] numCards = new ArrayList[Card.DRAGON + 1];
+			for (int i = Card.DOG; i <= Card.DRAGON; i++) {
+				numCards[i] = new ArrayList<Card>(4);
+			}
 			for (Card c : cards) {
-				cardsAL.add(c);
-				working.add(c);
+				val = c.getValue();
+				numCards[val].add(c);
 			}
 
-			for(Card c:cardsAL) {
-			//Iterator<Card> it = cards.iterator();
-			//while(it.hasNext()) {
-			//	Card c = it.next();
-				progress.clear();
-				if (findBomb) {
-					if (last3Card != null && last2Card != null && lastCard != null) {
-						if (last3Card.getValue() == last2Card.getValue() && last2Card.getValue() == lastCard.getValue() &&
-								lastCard.getValue() == c.getValue()) {
-							progress.add(last3Card);
-							progress.add(last2Card);
-							progress.add(lastCard);
-							progress.add(c);
-							working.remove(last3Card);
-							working.remove(last2Card);
-							working.remove(lastCard);
-							working.remove(c);
-							rating = rateCardSet(new CardSet(progress)) + new CardsRater(working).rateCards();
-							if (rating > bestRating) {
-								bestRating = rating;
-							}
-							working.add(last3Card);
-							working.add(last2Card);
-							working.add(lastCard);
-							working.add(c);
-						}
-					}
-				} else if (findTriple) {
-					if (last2Card != null && lastCard != null) {
-						if (last2Card.getValue() == lastCard.getValue() && lastCard.getValue() == c.getValue()) {
-							progress.add(last2Card);
-							progress.add(lastCard);
-							progress.add(c);
-							working.remove(last2Card);
-							working.remove(lastCard);
-							working.remove(c);
-							rating = rateCardSet(new CardSet(progress)) + new CardsRater(working).rateCards();
-							if (rating > bestRating) {
-								bestRating = rating;
-							}
-							working.add(last2Card);
-							working.add(lastCard);
-							working.add(c);
-						}
-					}
-				} else if (findPair) {
-					if (lastCard != null) {
-						if (lastCard.getValue() == c.getValue()) {
-							progress.add(lastCard);
-							progress.add(c);
-							working.remove(lastCard);
-							working.remove(c);
-							rating = rateCardSet(new CardSet(progress)) + new CardsRater(working).rateCards();
-							if (rating > bestRating) {
-								bestRating = rating;
-							}
-							working.add(lastCard);
-							working.add(c);
+			for (int i = Card.TWO; i <= Card.ACE; i++) {
+				ArrayList<Card> temp;
+				for (int j = 2; j <= 4; j++) {
+					if (numCards[i].size() >= j) {
+						temp = new ArrayList<Card>(numCards[i].subList(0, j));
+						rating = new CardSet(temp).getRating() + getRatingWithout(numCards[i], working);
+						if (rating > bestRating) {
+							bestRating = rating;
 						}
 					}
 				}
+			}
 
-				last3Card = last2Card;
-				last2Card = lastCard;
-				lastCard = c;
+			for (int begin = Card.MAHJONG; begin <= Card.ACE - 5; begin++) {
+				boolean phoenixInHand = numCards[Card.PHOENIX].size() > 0;
+				ArrayList<Card> longestStreet = new ArrayList<Card>(12), currentStreet = new ArrayList<Card>(12);
+				boolean phoenixAvailable = phoenixInHand;
+
+				for (int i = begin; i <= Card.ACE; i++) {
+					if (numCards[i].size() > 0) {
+						currentStreet.add(numCards[i].get(0));
+					} else {
+						if (phoenixAvailable && i >= Card.TWO && i <= Card.ACE) {
+							currentStreet.add(numCards[Card.PHOENIX].get(0));
+							phoenixAvailable = false;
+						} else {
+							if (currentStreet.size() > longestStreet.size()) {
+								longestStreet = (ArrayList<Card>) currentStreet.clone();
+							}
+							currentStreet.clear();
+							phoenixAvailable = phoenixInHand;
+						}
+					}
+				}
+				while (longestStreet.size() >= 5) {
+					// TODO: Add removing cards from end.
+					//System.out.println("new street " + longestStreet);
+					//System.out.flush();
+					try {
+						rating = new CardSet(longestStreet).getRating() + getRatingWithout(longestStreet, working);
+
+						if (rating > bestRating) {
+							bestRating = rating;
+						}
+					} catch (IllegalMoveException e) {
+						// TODO: solve illegal card sets.
+					}
+
+					longestStreet.remove(longestStreet.size() - 1);
+
+				}
 			}
 		} catch (IllegalMoveException e) {
 			e.printStackTrace();
 		}
 
-		//System.out.println("Best rating for hand " + cards + " is " + bestRating);
-
+		save.put(cards, bestRating);
 		return bestRating;
 	}
 
-	public int rateCardSet(CardSet cardSet) {
-		int rating = 0, size = cardSet.getCards().size();
-		for (Card c : cardSet.getCards()) {
-			rating += c.getValue();
+	private static int getRatingWithout(ArrayList<Card> without, TreeSet<Card> working) {
+		for (Card c : without) {
+			working.remove(c);
 		}
-		return rating * size * size;
+		int rating = new CardsRater().rateCards(working);
+		for (Card c : without) {
+			working.add(c);
+		}
+		return rating;
 	}
 }

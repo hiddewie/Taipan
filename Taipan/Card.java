@@ -48,7 +48,23 @@ public class Card implements Comparable<Card> {
 		return value;
 	}
 
-	public int getPoints () {
+	public int getRatingValue() {
+		if (type != SPECIAL) {
+			return getValue();
+		} else {
+			if (value == DOG) {
+				return DOG;
+			} else if (value == MAHJONG) {
+				return PHOENIX;
+			} else if (value == PHOENIX) {
+				return PHOENIX;
+			} else {
+				return DRAGON;
+			}
+		}
+	}
+
+	public int getPoints() {
 		if (value == DRAGON) {
 			return 25;
 		} else if (value == PHOENIX) {

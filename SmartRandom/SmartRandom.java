@@ -17,8 +17,61 @@ public class SmartRandom extends Player {
 	}
 
 	public Card[] giveCards() {
-		return new GiveCards(cards).giveCards();
-		//return new Card[]{cards.get(0), cards.get(1), cards.get(2)};
+		Card[] giving = new GiveCards(cards).giveCards();
+
+		giving = distributeGiveCards(giving);
+
+		System.out.println("I am giving cards: L: " + giving[1] + ", F: " + giving[2] + ", R: " + giving[0]);
+		System.out.println();
+		return giving;
+	}
+
+	public static Card[] distributeGiveCards(Card[] giving) {
+		Card a = giving[0], b = giving[1], c = giving[2], temp;
+		if (a.compareTo(b) > 0) {
+			temp = b;
+			b = a;
+			a = temp;
+		}
+		if (b.compareTo(c) > 0) {
+			temp = b;
+			b = c;
+			c = temp;
+		}
+		if (a.compareTo(b) > 0) {
+			temp = b;
+			b = a;
+			a = temp;
+		}
+
+		// If we give a special card, give the even one to the right.
+		if (a.getType() == Card.SPECIAL) {
+			temp = a;
+			a = b;
+			b = c;
+			c = temp;
+			//giving = new Card[]{b, c, a};
+		} else if (b.getType() == Card.SPECIAL) {
+			temp = b;
+			b = c;
+			c = temp;
+			//giving = new Card[]{a, c, b};
+		}
+
+		int firstVal = a.getValue(), secondVal = b.getValue();
+		boolean firstEven = firstVal % 2 == 0;
+		boolean secondEven = secondVal % 2 == 0;
+		if (firstEven && secondEven) {
+			giving = new Card[]{a, b, c};
+		} else if (!firstEven && secondEven) {
+			giving = new Card[]{b, a, c};
+		} else if (firstEven && !secondEven) {
+			giving = new Card[]{a, b, c};
+		} else {
+			giving = new Card[]{b, a, c};
+		}
+		// 0: right, 1: left, 2: front
+		return giving;
 	}
 
 	private CardSet getCardsToPlay() throws IllegalMoveException {
@@ -52,7 +105,7 @@ public class SmartRandom extends Player {
 		if (lastPlayedCardSet.getType() == CardSet.SINGLE) {
 			int lastPlayedValue = lastPlayedCardSet.getCards().get(0).getValue();
 			ArrayList<Card> cs = new ArrayList<Card>();
-			for(Card c: cards) {
+			for (Card c : cards) {
 				if (c.getValue() > lastPlayedValue) {
 					cs.add(c);
 					break;

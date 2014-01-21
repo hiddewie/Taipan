@@ -13,7 +13,7 @@ public class RuleChecker {
 	private CardSet lastPlayed = null;
 	private PointChecker pointChecker = new PointChecker();
 
-	public void setStartingPlayer (int startingPlayer) {
+	public void setStartingPlayer(int startingPlayer) {
 		pointChecker.setStartingPlayer(startingPlayer);
 	}
 
@@ -62,42 +62,55 @@ public class RuleChecker {
 		pointChecker.roundEnded();
 	}
 
-	public void dragonTrickToPlayer (int playerID) {
+	public void dragonTrickToPlayer(int playerID) {
 		pointChecker.dragonTrickToPlayer(playerID);
 	}
-	public int[] getRoundPoints () {
+
+	public int[] getRoundPoints() {
 		return pointChecker.getRoundPoints();
 	}
 
-	public boolean roundKeepPlaying () {
+	public boolean roundKeepPlaying() {
 		return pointChecker.roundKeepPlaying();
 	}
-	public boolean trickKeepPlaying () {
+
+	public boolean trickKeepPlaying() {
 		return pointChecker.trickKeepPlaying();
 	}
-	public int nextPlayer () {
+
+	public int nextPlayer() {
 		return pointChecker.nextPlayer();
 	}
-	public int nextPlayingPlayer () {
+
+	public int nextPlayingPlayer() {
 		return pointChecker.nextPlayingPlayer();
 	}
-	public void pass () {
+
+	public void pass() {
 		pointChecker.pass();
 	}
-	public int getCurrentPlayerIndex () {
+
+	/**
+	 * @return The current player index
+	 */
+	public int getCurrentPlayerIndex() {
 		return pointChecker.getCurrentPlayerIndex();
 	}
-	public int getTrickPoints () {
+
+	public int getTrickPoints() {
 		return pointChecker.getTrickPoints();
 	}
-	public int[] getGamePoints () {
+
+	public int[] getGamePoints() {
 		return pointChecker.getGamePoints();
 	}
-	public void greatTaipan (int playerID) throws IllegalMoveException{
+
+	public void greatTaipan(int playerID) throws IllegalMoveException {
 		System.out.println("Player " + playerID + " great-taipans");
 		pointChecker.greatTaipan(playerID);
 	}
-	public void taipan (int playerID) throws IllegalMoveException{
+
+	public void taipan(int playerID) throws IllegalMoveException {
 		System.out.println("Player " + playerID + " taipans");
 		pointChecker.taipan(playerID);
 	}

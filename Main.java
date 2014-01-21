@@ -1,6 +1,9 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.TreeSet;
 
 import SmartRandom.SmartRandom;
+import SmartRandom.CardsRater;
 import Taipan.*;
 
 class Main {
@@ -9,50 +12,47 @@ class Main {
 	}
 
 	public Main() {
+		//startGame();
+		test();
+	}
+
+	private void startGame () {
 		try {
-			new Game<SmartRandom, SmartRandom, SmartRandom, SmartRandom>(SmartRandom.class, SmartRandom.class, SmartRandom.class, SmartRandom.class).play();
+			new Game<SmartRandom, SmartRandom, SmartRandom, SmartRandom>(SmartRandom.class, SmartRandom.class,
+					SmartRandom.class, SmartRandom.class).play();
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		}
-		//test();
 	}
 
 	void test() {
-		class Test {
-			String s;
-			int soFar;
+		// TODO: [D, M, 2, 3, 5, 5, 8, 9, T, J, A]
 
-			Test(String s1, int soFar1) {
-				s = s1;
-				soFar = soFar1;
+		TreeSet<Card> t = new TreeSet<Card>();
+		int J = Card.JACK, Q = Card.QUEEN, K = Card.KING, A = Card.ACE, P = Card.PHOENIX, D = Card.DOG,
+				G = Card.DRAGON, M = Card.MAHJONG, T = Card.TEN;
+		int[] nums = new int[] {M, 3, 4, 5, 7, 7, 8, 9, T, T, Q, Q, A, P};
+
+		int[] colors = new int[Card.DRAGON + 1];
+		for (int i = 0; i < colors.length; i++) {
+			colors[i] = Card.BLUE;
+		}
+		for (int i: nums) {
+			if (i == G || i == D || i == P || i == M) {
+				t.add(new Card(i, Card.SPECIAL));
+			} else {
+				t.add(new Card(i, colors[i]));
+				colors[i] ++;
 			}
 		}
-		ArrayList<Test> t = new ArrayList<Test>();
-		t.add(new Test("0", 0));
-		t.add(new Test("1", 1));
-		t.add(new Test("2", 2));
-		for (int i = 1; i < 10; i++) {
-			ArrayList<Test> t2 = new ArrayList<Test>();
-			for (Test s : t) {
-				/*t2.add(new Test(s.s + "0", s.soFar + 0));
-				if (s.soFar <= 4) t2.add(new Test(s.s + "1", s.soFar + 1));
-				if (s.soFar <= 3) t2.add(new Test(s.s + "2", s.soFar + 2));*/
-				t2.add(new Test(s.s + "0", s.soFar + 0));
-				if (s.s.charAt(s.s.length() - 1) != '1') t2.add(new Test(s.s + "1", s.soFar + 1));
-				t2.add(new Test(s.s + "2", s.soFar + 2));
-			}
-			t = t2;
+
+		SmartRandom sr = new SmartRandom();
+		for(Card c: t) {
+			sr.giveCard(c);
 		}
-		int k = 0;
-		for (Test s : t) {
-			if (s.soFar == 5 || true) {
-				System.out.println(s.s + " " + s.soFar);
-				k++;
-			}
-		}
-		System.out.println(k);
+		System.out.println(t + ", " + Arrays.toString(sr.giveCards()));
 	}
 }
 

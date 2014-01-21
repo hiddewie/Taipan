@@ -73,7 +73,6 @@ public class CardSet implements Comparable<CardSet> {
 							v++;
 						}
 					}
-					System.out.println(k + " " + v);
 					if (k == n - 3 || (k == n - 4 && v == 1)) {
 						return STREET;
 					}
@@ -266,6 +265,21 @@ public class CardSet implements Comparable<CardSet> {
 			s += c.getPoints();
 		}
 		return s;
+	}
+
+	public int getRating() {
+		int rating = 0, size = cards.size();
+		for (Card c : cards) {
+			rating += c.getRatingValue();
+		}
+		if (type == BOMB) {
+			rating *= 2;
+		}
+		if (type == STREET) {
+			rating *= 2;
+		}
+		//System.out.println(cards + ": " + rating * size);
+		return rating * /*size * */size;
 	}
 
 	public int compareTo(CardSet other) {
